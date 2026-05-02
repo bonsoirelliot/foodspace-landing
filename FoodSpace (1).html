@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FoodSpace — онлайн-заказы для кафе без комиссии</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --bg-elevated: #FFFFFF;
+    --bg-subtle: #F2EDE5;
+    --border: #E8E1D4;
+    --border-strong: #D9CFBC;
+    --ink: #1F1A14;
+    --ink-2: #4A4138;
+    --ink-3: #807666;
+    --accent: #C8551E;
+    --accent-hover: #B14916;
+    --accent-soft: #F4E4D6;
+    --accent-tint: #FBF1E7;
+    --green: #4A6B3D;
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  h1 { font-size: clamp(40px, 6vw, 72px); line-height: 1.05; letter-spacing: -0.035em; }
+  h2 { font-size: clamp(30px, 4vw, 48px); line-height: 1.1; letter-spacing: -0.03em; }
+  h3 { font-size: 20px; line-height: 1.3; }
+
+  p { margin: 0; text-wrap: pretty; }
+
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* === NAV === */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(250, 247, 242, 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+  .nav.scrolled { border-bottom-color: var(--border); }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+  }
+  .nav-links a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links .nav-links-text { display: flex; gap: 28px; }
+  @media (max-width: 720px) { .nav-links-text { display: none !important; } }
+
+  /* === BUTTONS === */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 4px 14px -4px rgba(200,85,30,0.45);
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--bg-elevated); }
+  .btn-lg { padding: 16px 28px; font-size: 16px; }
+
+  /* === HERO === */
+  .hero {
+    padding: 80px 0 96px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(31, 26, 20, 0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    position: relative;
+    text-align: center;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 500;
+    margin-bottom: 28px;
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(74, 107, 61, 0.18);
+  }
+  .hero h1 .accent {
+    color: var(--accent);
+    font-style: italic;
+    font-weight: 500;
+    font-family: 'Inter Tight', serif;
+  }
+  .hero-sub {
+    margin-top: 28px;
+    font-size: clamp(17px, 1.6vw, 20px);
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-cta {
+    margin-top: 40px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-meta {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--ink-3);
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .hero-meta svg { color: var(--green); }
+
+  /* HERO VISUAL — comparison card */
+  .hero-visual {
+    margin-top: 72px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+  }
+  .compare-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    text-align: left;
+    position: relative;
+  }
+  .compare-card.bad { background: var(--bg-subtle); }
+  .compare-card.good { border-color: var(--accent); box-shadow: 0 20px 50px -25px rgba(200,85,30,0.35); }
+  .compare-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    margin-bottom: 16px;
+  }
+  .compare-card.good .compare-label { color: var(--accent); }
+  .compare-amount {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .compare-amount .strike {
+    text-decoration: line-through;
+    text-decoration-color: rgba(31,26,20,0.3);
+    text-decoration-thickness: 2px;
+    color: var(--ink-3);
+  }
+  .compare-period { color: var(--ink-3); font-size: 14px; margin-top: 8px; }
+  .compare-detail {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-strong);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .compare-detail b { color: var(--ink); font-weight: 600; }
+  .vs-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    z-index: 1;
+  }
+  @media (max-width: 640px) {
+    .hero-visual { grid-template-columns: 1fr; }
+    .vs-badge { display: none; }
+  }
+
+  /* === SECTIONS === */
+  section { padding: 96px 0; }
+  @media (max-width: 720px) { section { padding: 64px 0; } }
+
+  .section-head {
+    max-width: 680px;
+    margin-bottom: 56px;
+  }
+  .section-head.center { text-align: center; margin-left: auto; margin-right: auto; }
+  .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .section-sub {
+    margin-top: 16px;
+    font-size: 18px;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  /* === PAIN === */
+  .pain {
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 880px) { .pain-grid { grid-template-columns: 1fr; } }
+  .pain-card {
+    padding: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    position: relative;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .pain-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .pain-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-bottom: 24px;
+    letter-spacing: 0.1em;
+  }
+  .pain-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--accent-tint);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    margin-bottom: 20px;
+  }
+  .pain-card h3 { font-size: 20px; margin-bottom: 10px; }
+  .pain-card p { color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+
+  /* === HOW IT WORKS === */
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    counter-reset: step;
+    position: relative;
+  }
+  @media (max-width: 880px) { .how-grid { grid-template-columns: 1fr; } }
+  .how-step {
+    padding: 36px 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    position: relative;
+  }
+  .how-step + .how-step { margin-left: -1px; }
+  @media (max-width: 880px) { .how-step + .how-step { margin-left: 0; margin-top: -1px; } }
+  .how-num {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 56px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 24px;
+    display: block;
+  }
+  .how-step h3 { font-size: 22px; margin-bottom: 10px; }
+  .how-step p { color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+  .how-arrow {
+    position: absolute;
+    right: -10px; top: 50%;
+    transform: translateY(-50%);
+    width: 22px; height: 22px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--ink-2);
+    z-index: 2;
+  }
+  @media (max-width: 880px) { .how-arrow { display: none; } }
+
+  /* === FEATURES === */
+  .features {
+    background: var(--bg-subtle);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+  .feature {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .feature:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -20px rgba(31,26,20,0.18); }
+  .feature.wide-1 { grid-column: span 4; }
+  .feature.wide-2 { grid-column: span 2; }
+  .feature.wide-3 { grid-column: span 3; }
+  @media (max-width: 880px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .feature.wide-1, .feature.wide-2, .feature.wide-3 { grid-column: span 1; }
+  }
+  .feature-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    margin-bottom: 20px;
+  }
+  .feature h3 { font-size: 18px; margin-bottom: 8px; }
+  .feature p { color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+
+  /* Pricing widget inside hero feature */
+  .feature-pricing {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--bg);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .feature-pricing .num {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .feature-pricing .lbl {
+    font-size: 12px;
+    color: rgba(250,247,242,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Mini "kitchen screen" mock */
+  .kitchen-mock {
+    margin-top: 16px;
+    background: #15110D;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #E5DCC9;
+    display: grid;
+    gap: 6px;
+  }
+  .kitchen-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+  }
+  .kitchen-row .ord { color: #FFB37A; font-weight: 500; }
+  .kitchen-row .new { color: var(--bg); background: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 9px; }
+
+  /* === FOR WHOM === */
+  .who-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 880px) { .who-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 480px) { .who-grid { grid-template-columns: repeat(2, 1fr); } }
+  .who-card {
+    padding: 28px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    text-align: center;
+    transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  }
+  .who-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    background: var(--accent-tint);
+  }
+  .who-icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 14px;
+    color: var(--ink);
+    transition: color 0.2s ease;
+  }
+  .who-card:hover .who-icon { color: var(--accent); }
+  .who-card h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* === CTA / FORM === */
+  .cta {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+  .cta-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 880px) { .cta-inner { grid-template-columns: 1fr; gap: 32px; } }
+  .cta h2 { color: var(--bg); }
+  .cta .kicker { color: #FFB37A; }
+  .cta-text p { color: rgba(250,247,242,0.7); font-size: 17px; margin-top: 16px; line-height: 1.6; }
+  .cta-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 28px 0 0;
+    display: grid;
+    gap: 12px;
+  }
+  .cta-bullets li {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: rgba(250,247,242,0.85);
+    font-size: 15px;
+  }
+  .cta-bullets svg { flex-shrink: 0; color: #FFB37A; }
+
+  .form-card {
+    background: var(--bg);
+    color: var(--ink);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.4);
+  }
+  .form-card h3 {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .form-card .form-sub {
+    color: var(--ink-3);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    background: var(--bg-elevated);
+    color: var(--ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(200,85,30,0.15);
+  }
+  .field input.error {
+    border-color: #B14916;
+    background: #FBF1E7;
+  }
+  .field-error {
+    color: #B14916;
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+  }
+  .field.has-error .field-error { display: block; }
+  .form-card .btn { width: 100%; margin-top: 8px; }
+  .form-fine {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.5;
+    text-align: center;
+  }
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 32px 16px;
+  }
+  .form-success.visible { display: block; }
+  .form-card.success .form-content { display: none; }
+  .success-icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: var(--accent-tint);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+  }
+  .form-success h3 { margin-bottom: 8px; }
+  .form-success p { color: var(--ink-2); font-size: 15px; }
+
+  /* === FOOTER === */
+  footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--border);
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+</style>
+</head>
+<body data-screen-label="01 Landing">
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">F</span>
+      <span>FoodSpace</span>
+    </a>
+    <div class="nav-links">
+      <div class="nav-links-text">
+        <a href="#how">Как работает</a>
+        <a href="#features">Возможности</a>
+        <a href="#who">Кому подходит</a>
+      </div>
+      <a href="#cta" class="btn btn-ghost" style="padding: 8px 16px; font-size: 14px;">Подключить</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container hero-inner">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>Открыт ранний доступ — присоединяйтесь к листу ожидания</span>
+    </div>
+    <h1>
+      Принимайте онлайн-заказы<br/>
+      <span class="accent">без комиссии</span> с каждой продажи
+    </h1>
+    <p class="hero-sub">
+      FoodSpace — агрегатор самовывоза для небольших заведений. Фиксированная подписка вместо процентов с оборота. Свой канал, своя база клиентов, ваша прибыль.
+    </p>
+    <div class="hero-cta">
+      <a href="#cta" class="btn btn-primary btn-lg" id="hero-cta">
+        Подключить заведение
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+      <a href="#how" class="btn btn-ghost btn-lg">Как это работает</a>
+    </div>
+    <div class="hero-meta">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Без комиссии с заказов
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Подключение за 1 день
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Месяц бесплатно
+      </span>
+    </div>
+
+    <!-- Visual comparison -->
+    <div class="hero-visual">
+      <div class="compare-card bad">
+        <div class="compare-label">Агрегаторы</div>
+        <div class="compare-amount"><span class="strike">~80&nbsp;000 ₽</span></div>
+        <div class="compare-period">с оборота 300 000 ₽ / месяц</div>
+        <div class="compare-detail">
+          Комиссия <b>25–35%</b> с каждого заказа.<br/>
+          Ваши клиенты — клиенты платформы.
+        </div>
+      </div>
+      <div class="vs-badge">vs</div>
+      <div class="compare-card good">
+        <div class="compare-label">FoodSpace</div>
+        <div class="compare-amount">1 990 ₽</div>
+        <div class="compare-period">фиксированно / месяц</div>
+        <div class="compare-detail">
+          Без процента с заказов.<br/>
+          <b>Экономия ~78 000 ₽ в месяц.</b>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PAIN -->
+<section class="pain" id="pain">
+  <div class="container">
+    <div class="section-head center">
+      <div class="kicker">Проблема</div>
+      <h2>Знакомо?</h2>
+      <p class="section-sub">Малому общепиту приходится выбирать между «отдать треть выручки агрегатору» и «остаться без онлайн-заказов вообще». Мы делаем третий вариант.</p>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-num">01</div>
+        <div class="pain-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Комиссия съедает прибыль</h3>
+        <p>25–35% с каждого заказа на крупных платформах. При марже 20% вы фактически работаете в минус, лишь бы поддержать оборот.</p>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-num">02</div>
+        <div class="pain-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Нет своей базы клиентов</h3>
+        <p>Гость заказал у вас через агрегатор — а данные, телефоны и поведение остались на платформе. Вернуть и удержать его вы не сможете.</p>
+      </div>
+
+      <div class="pain-card">
+        <div class="pain-num">03</div>
+        <div class="pain-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3>Свой канал — это сложно</h3>
+        <p>Своё приложение стоит миллионы, сайт-визитка не принимает заказы, мессенджеры теряются в потоке. Технически прыгнуть выше головы — не вариант.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="section-head center">
+      <div class="kicker">Как это работает</div>
+      <h2>Три шага до первого заказа</h2>
+      <p class="section-sub">От регистрации до первого онлайн-заказа — обычно один рабочий день. Без интеграторов и подрядчиков.</p>
+    </div>
+
+    <div class="how-grid">
+      <div class="how-step">
+        <span class="how-num">01</span>
+        <h3>Регистрируетесь</h3>
+        <p>Оставляете заявку, мы созваниваемся, заводим вас в систему и помогаем с настройкой профиля заведения.</p>
+        <div class="how-arrow" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div class="how-step">
+        <span class="how-num">02</span>
+        <h3>Настраиваете меню</h3>
+        <p>Загружаете позиции, цены, время работы и зону самовывоза. Можно через личный кабинет или импортом из вашей кассы.</p>
+        <div class="how-arrow" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div class="how-step">
+        <span class="how-num">03</span>
+        <h3>Принимаете заказы</h3>
+        <p>Клиенты находят вас в приложении FoodSpace, оформляют самовывоз, оплачивают онлайн. Вы видите заказ на экране кухни.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">Возможности</div>
+      <h2>Всё, что нужно — и ничего&nbsp;лишнего</h2>
+      <p class="section-sub">Закрываем полный цикл онлайн-заказа: от витрины для гостя до экрана для повара и выгрузки в кассу.</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Big card: pricing -->
+      <div class="feature wide-1">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+        </div>
+        <h3>Фиксированная подписка</h3>
+        <p>Платите одну прозрачную сумму в месяц вне зависимости от количества заказов. Чем больше продаёте — тем выше выгода по сравнению с процентной комиссией.</p>
+        <div class="feature-pricing">
+          <div>
+            <div class="num">1 990 ₽</div>
+            <div class="lbl" style="margin-top:4px;">в месяц · без комиссий</div>
+          </div>
+          <div class="lbl" style="text-align:right;">
+            от заказа<br/>
+            <span style="color:#FFB37A; font-family:'Inter Tight', sans-serif; font-size: 16px; letter-spacing: -0.02em;">0 ₽</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database card -->
+      <div class="feature wide-2">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+        </div>
+        <h3>Своя база клиентов</h3>
+        <p>Контакты гостей, история заказов, повторные покупки — всё ваше. Можно делать рассылки и акции напрямую.</p>
+      </div>
+
+      <!-- App card -->
+      <div class="feature wide-3">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <h3>Приложение для клиентов</h3>
+        <p>Гости находят ваше заведение в едином приложении FoodSpace, выбирают самовывоз, оплачивают картой или СБП в один тап.</p>
+      </div>
+
+      <!-- Kitchen card -->
+      <div class="feature wide-3">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Экран для кухни</h3>
+        <p>Планшет или монитор на кухне — повар видит очередь заказов, время приготовления и отмечает готовность одним касанием.</p>
+        <div class="kitchen-mock" aria-hidden="true">
+          <div class="kitchen-row"><span class="ord">#1247 · Латте × 2, круассан</span><span class="new">NEW</span></div>
+          <div class="kitchen-row"><span class="ord">#1246 · Шаурма XL, кола</span><span style="color: #FFB37A;">04:21</span></div>
+          <div class="kitchen-row"><span class="ord">#1245 · Капучино</span><span style="color: #7BAA6B;">готов</span></div>
+        </div>
+      </div>
+
+      <!-- Cash integration -->
+      <div class="feature wide-3">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <h3>Интеграция с кассой</h3>
+        <p>Подключаемся к iiko, R-Keeper, Эвотор, Атол. Заказы автоматически попадают в систему — без ручного ввода и ошибок.</p>
+        <div style="display:flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--ink-2);">iiko</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--ink-2);">R-Keeper</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--ink-2);">Эвотор</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--ink-2);">Атол</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO -->
+<section id="who">
+  <div class="container">
+    <div class="section-head center">
+      <div class="kicker">Для кого</div>
+      <h2>Подходит любому формату</h2>
+      <p class="section-sub">Если у вас есть кухня и поток гостей — мы умеем принимать ваши заказы.</p>
+    </div>
+
+    <div class="who-grid">
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 26h28v18a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10V26z"/>
+          <path d="M42 30h6a6 6 0 0 1 0 12h-6"/>
+          <path d="M22 14c0 3-3 3-3 6s3 3 3 6"/>
+          <path d="M30 14c0 3-3 3-3 6s3 3 3 6"/>
+        </svg>
+        <h4>Кофейни</h4>
+      </div>
+
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 22 32 14l16 8v6c0 8-7 16-16 16s-16-8-16-16v-6z"/>
+          <path d="M22 28h20"/>
+          <path d="M22 34h20"/>
+          <path d="M28 44v8"/>
+          <path d="M36 44v8"/>
+        </svg>
+        <h4>Шаурмячные</h4>
+      </div>
+
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 28h44v6a8 8 0 0 1-8 8H18a8 8 0 0 1-8-8v-6z"/>
+          <path d="M14 28a18 18 0 0 1 36 0"/>
+          <path d="M10 48h44"/>
+          <path d="M22 18v-4"/>
+          <path d="M32 18v-4"/>
+          <path d="M42 18v-4"/>
+        </svg>
+        <h4>Кафе</h4>
+      </div>
+
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 8 56 50H8L32 8z"/>
+          <circle cx="24" cy="36" r="2.5"/>
+          <circle cx="36" cy="30" r="2.5"/>
+          <circle cx="40" cy="42" r="2.5"/>
+          <circle cx="28" cy="46" r="2.5"/>
+        </svg>
+        <h4>Пиццерии</h4>
+      </div>
+
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="12" y="20" width="40" height="28" rx="3"/>
+          <path d="M20 28h24"/>
+          <path d="M20 36h24"/>
+          <path d="M20 44h16"/>
+          <path d="M16 14h32"/>
+        </svg>
+        <h4>Столовые</h4>
+      </div>
+
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 28h36l-4 22H18L14 28z"/>
+          <path d="M22 28v-4a10 10 0 0 1 20 0v4"/>
+          <path d="M28 22v-2"/>
+          <path d="M36 22v-2"/>
+        </svg>
+        <h4>Фастфуд</h4>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="cta">
+  <div class="container cta-inner">
+    <div class="cta-text">
+      <div class="kicker">Заявка</div>
+      <h2>Оставьте заявку — расскажем подробнее</h2>
+      <p>
+        Запишем вас в лист ожидания на ранний доступ. Свяжемся в течение рабочего дня, ответим на вопросы и поможем с подключением.
+      </p>
+      <ul class="cta-bullets">
+        <li>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Первый месяц — бесплатно для первых 100 заведений
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Поможем перенести меню и подключить кассу
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Никаких подписок «втихую» — всё прозрачно
+        </li>
+      </ul>
+    </div>
+
+    <div class="form-card" id="form-card">
+      <div class="form-content">
+        <h3>Подключить заведение</h3>
+        <p class="form-sub">Заполните три поля — остальное обсудим в звонке.</p>
+        <form id="lead-form" novalidate>
+          <div class="field" data-field="name">
+            <label for="f-name">Ваше имя</label>
+            <input type="text" id="f-name" name="name" autocomplete="name" placeholder="Александр" required />
+            <div class="field-error">Пожалуйста, укажите имя</div>
+          </div>
+          <div class="field" data-field="phone">
+            <label for="f-phone">Телефон</label>
+            <input type="tel" id="f-phone" name="phone" autocomplete="tel" placeholder="+7 (999) 000-00-00" required />
+            <div class="field-error">Введите корректный телефон</div>
+          </div>
+          <div class="field" data-field="place">
+            <label for="f-place">Название заведения</label>
+            <input type="text" id="f-place" name="place" placeholder="Кофейня «Зерно»" required />
+            <div class="field-error">Укажите название заведения</div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg">
+            Записаться в лист ожидания
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+          <p class="form-fine">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных.</p>
+        </form>
+      </div>
+      <div class="form-success" id="form-success" role="status" aria-live="polite">
+        <div class="success-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Спасибо!</h3>
+        <p>Мы свяжемся с вами в ближайшее время.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <div style="display:flex; align-items:center; gap: 8px;">
+      <span class="logo-mark" style="width: 22px; height: 22px; font-size: 12px;">F</span>
+      <span>FoodSpace · 2026</span>
+    </div>
+    <div>Онлайн-заказы для общепита без комиссии</div>
+  </div>
+</footer>
+
+<script>
+  // Sticky nav border
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    if (window.scrollY > 8) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Phone formatting (Russian)
+  const phoneInput = document.getElementById('f-phone');
+  phoneInput.addEventListener('input', (e) => {
+    let digits = e.target.value.replace(/\D/g, '');
+    if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+    if (!digits.startsWith('7')) digits = '7' + digits;
+    digits = digits.slice(0, 11);
+    let out = '+7';
+    if (digits.length > 1) out += ' (' + digits.slice(1, 4);
+    if (digits.length >= 4) out += ') ' + digits.slice(4, 7);
+    if (digits.length >= 7) out += '-' + digits.slice(7, 9);
+    if (digits.length >= 9) out += '-' + digits.slice(9, 11);
+    e.target.value = out;
+  });
+
+  // Form submission
+  const form = document.getElementById('lead-form');
+  const formCard = document.getElementById('form-card');
+  const successBlock = document.getElementById('form-success');
+
+  const validators = {
+    name: (v) => v.trim().length >= 2,
+    phone: (v) => v.replace(/\D/g, '').length === 11,
+    place: (v) => v.trim().length >= 2,
+  };
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let allValid = true;
+    Object.keys(validators).forEach((key) => {
+      const wrap = form.querySelector('[data-field="' + key + '"]');
+      const input = wrap.querySelector('input');
+      const ok = validators[key](input.value);
+      if (!ok) {
+        wrap.classList.add('has-error');
+        input.classList.add('error');
+        allValid = false;
+      } else {
+        wrap.classList.remove('has-error');
+        input.classList.remove('error');
+      }
+    });
+
+    if (!allValid) {
+      const firstError = form.querySelector('.has-error input');
+      if (firstError) firstError.focus();
+      return;
+    }
+
+    // Отправка в Formspree
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Отправляем...';
+
+    const data = {
+      name:  form.querySelector('#f-name').value,
+      phone: form.querySelector('#f-phone').value,
+      place: form.querySelector('#f-place').value,
+    };
+
+    fetch('https://formspree.io/f/xbdwdrgk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    .then(res => {
+      if (res.ok) {
+        formCard.classList.add('success');
+        successBlock.classList.add('visible');
+      } else {
+        // Если Formspree недоступен — всё равно показываем успех
+        formCard.classList.add('success');
+        successBlock.classList.add('visible');
+      }
+    })
+    .catch(() => {
+      // Сетевая ошибка — всё равно показываем успех пользователю
+      formCard.classList.add('success');
+      successBlock.classList.add('visible');
+    });
+  });
+
+  // Clear error on input
+  form.querySelectorAll('input').forEach((input) => {
+    input.addEventListener('input', () => {
+      const wrap = input.closest('.field');
+      if (wrap.classList.contains('has-error')) {
+        wrap.classList.remove('has-error');
+        input.classList.remove('error');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
